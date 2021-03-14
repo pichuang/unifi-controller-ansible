@@ -1,0 +1,26 @@
+[controller]
+controller.pichuang.internal ansible_host=192.168.55.1 ansible_ssh_user=root ansible_shell_executable="/bin/sh" ansible_ssh_private_key_file=ubi_rsa
+
+[switch]
+usw-poe.pichuang.internal ansible_host=192.168.55.109
+usw.pichuang.internal ansible_host=192.168.55.110
+
+[bastion]
+localhost ansible_host=localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3
+
+[ap_group]
+ap01.pichuang.internal  ansible_host=192.168.55.111
+ap02.pichuang.internal  ansible_host=192.168.55.112
+ap03.pichuang.internal  ansible_host=192.168.55.113
+ap04.pichuang.internal  ansible_host=192.168.55.114
+ap05.pichuang.internal  ansible_host=192.168.55.115
+ap06.pichuang.internal  ansible_host=192.168.55.116
+ap07.pichuang.internal  ansible_host=192.168.55.117
+
+[ubi:children]
+controller
+ap_group
+switch
+
+[ubi:vars]
+ansible_ssh_private_key_file=ubi_rsa

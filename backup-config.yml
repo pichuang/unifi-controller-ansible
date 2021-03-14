@@ -1,0 +1,35 @@
+---
+- hosts: controller
+  gather_facts: false
+  vars:
+    autobackup_path: "/data/unifi/data/backup/autobackup"
+    tarball_name: "uifi-backup"
+  tasks:
+    - name: Get timestamp from the system
+      command:
+        cmd: "date +%Y-%m-%d%H-%M-%S"
+      delegate_to: localhost
+      register: tstamp
+
+    - name: Set Current Date
+      set_fact:
+        current_date: "{{ tstamp.stdout[0:10]}}"
+
+    - name: List all backup
+      ansible.builtin.raw: "ls -la {{ autobackup_path }}"
+
+    - name: "Tar {{ autobackup_path }}"
+      ansible.builtin.raw: "tar zcvf {{ tarball_name }}.tar.gz {{ autobackup_path }}"
+
+    - name: Fetch the {{ tarball_name }}
+      ansible.builtin.command:
+        cmd: "scp -i {{ ansible_ssh_private_key_file }} root@{{ inventory_hostname }}:~/{{ tarball_name }}.tar.gz backup/{{ tarball_name }}-{{ current_date }}.tar.gz"
+      delegate_to: localhost
+
+    - name: Check that the backup/{{ tarball_name }}-{{ current_date }}.tar.gz exists
+      stat:
+        path: "backup/{{ tarball_name }}-{{ current_date }}.tar.gz"
+      delegate_to: localhost
+
+    - name: Remove UDM Tarball {{ tarball_name }} for saving space
+      ansible.builtin.raw: "rm ~/{{ tarball_name }}.tar.gz"
